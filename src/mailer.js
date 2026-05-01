@@ -35,12 +35,20 @@ async function sendLeadEmail(lead) {
     'Источник: MAX bot / Яндекс Карты',
   ];
 
-  await mailer.sendMail({
-    from: config.fromEmail,
-    to: config.leadsEmail,
-    subject: 'Новая заявка из MAX',
-    text: lines.join('\n'),
-  });
+  try {
+    const info = await mailer.sendMail({
+      from: config.fromEmail,
+      to: config.leadsEmail,
+      subject: 'Новая заявка из MAX',
+      text: lines.join('\n'),
+    });
+
+    console.log('Lead email sent:', info?.messageId || '<no-message-id>');
+    return info;
+  } catch (error) {
+    console.error('Lead email failed:', error);
+    throw error;
+  }
 }
 
 module.exports = {

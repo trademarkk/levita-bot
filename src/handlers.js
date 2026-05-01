@@ -103,14 +103,33 @@ async function finalizeLead({ chatId, userId, user }) {
     createdAt: new Date().toISOString(),
   };
 
-  await saveLead(lead);
-  await sendLeadEmail(lead);
-  resetSession(userId);
+  console.log('Finalizing lead:', JSON.stringify(lead));
 
-  await sendMessage({
-    chatId,
-    text: getFinalText(),
-  });
+  try {
+    await saveLead(lead);
+    console.log('Lead saved locally');
+
+    await sendLeadEmail(lead);
+    console.log('Lead email step completed');
+
+    resetSession(userId);
+
+    await sendMessage({
+      chatId,
+      text: getFinalText(),
+    });
+
+    console.log('Final message sent to user');
+  } catch (error) {
+    console.error('Finalize lead failed:', error);
+
+    await sendMessage({
+      chatId,
+      text: 'Заявка не отправилась из-за технической ошибки. Попробуйте ещё раз чуть позже или напишите нам напрямую.',
+    });
+
+    throw error;
+  }
 }
 
 function getIncomingText(update) {
