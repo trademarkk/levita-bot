@@ -100,12 +100,24 @@ async function finalizeLead({ chatId, userId, user }) {
   });
 }
 
+function getIncomingText(update) {
+  return String(
+    update.message?.body?.text ||
+      update.message?.text ||
+      update.text ||
+      ''
+  ).trim();
+}
+
 async function handleTextMessage(update) {
   const chatId = update.chat_id;
   const user = update.user || {};
   const userId = user.user_id;
-  const text = String(update.message?.body?.text || '').trim();
+  const text = getIncomingText(update);
   const session = getSession(userId);
+
+  console.log('MAX message raw update:', JSON.stringify(update));
+  console.log('MAX incoming text:', text || '<empty>');
 
   if (!text) {
     await sendWelcome(chatId, userId);
@@ -114,6 +126,11 @@ async function handleTextMessage(update) {
 
   if (text === '/start') {
     await sendWelcome(chatId, userId);
+    return;
+  }
+
+  if (text === 'Продолжить') {
+    await askName(chatId, userId);
     return;
   }
 
@@ -148,8 +165,14 @@ async function handleTextMessage(update) {
 function getCallbackPayload(update) {
   return String(
     update.callback?.payload ||
+      update.callback?.data ||
       update.message?.callback?.payload ||
+      update.message?.callback?.data ||
       update.message?.body?.callback?.payload ||
+      update.message?.body?.callback?.data ||
+      update.message?.body?.text ||
+      update.message?.text ||
+      update.text ||
       update.payload ||
       ''
   ).trim();
@@ -164,7 +187,7 @@ async function handleCallback(update) {
   console.log('MAX callback payload:', payload || '<empty>');
   console.log('MAX callback raw update:', JSON.stringify(update));
 
-  if (payload === 'continue_flow') {
+  if (payload === 'continue_flow' || payload === 'Продолжить') {
     await askName(chatId, userId);
     return;
   }
