@@ -43,13 +43,9 @@ function getConfirmText(lead) {
     `Имя: *${lead.name || '-'}*`,
     `Номер телефона: *${lead.phone || '-'}*`,
     `Ник в Telegram: *${lead.telegram || 'не указан'}*`,
+    '',
+    'Если всё верно, подтвердите отправку заявки.',
   ];
-
-  if (lead.source) {
-    lines.push(`Источник: *${lead.source}*`);
-  }
-
-  lines.push('', 'Если всё верно, подтвердите отправку заявки.');
 
   return lines.join('\n');
 }

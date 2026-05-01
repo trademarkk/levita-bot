@@ -55,11 +55,15 @@ async function sendLeadEmail(lead) {
     '</div>',
   ].join('');
 
+  const subject = lead.source
+    ? `Новая заявка из MAX [${lead.source}]`
+    : 'Новая заявка из MAX';
+
   try {
     const result = await resend.emails.send({
       from: config.fromEmail,
       to: config.leadsEmail,
-      subject: 'Новая заявка из MAX',
+      subject,
       text: textLines.join('\n'),
       html,
     });
