@@ -1,26 +1,22 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const config = require('./config');
 
-let transporter = null;
+let resendClient = null;
 
-function getTransporter() {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: config.smtp.host,
-      port: config.smtp.port,
-      secure: config.smtp.secure,
-      auth: {
-        user: config.smtp.user,
-        pass: config.smtp.pass,
-      },
-    });
+function getResendClient() {
+  if (!config.resendApiKey) {
+    throw new Error('RESEND_API_KEY is not set');
   }
 
-  return transporter;
+  if (!resendClient) {
+    resendClient = new Resend(config.resendApiKey);
+  }
+
+  return resendClient;
 }
 
 async function sendLeadEmail(lead) {
-  const mailer = getTransporter();
+  const resend = getResendClient();
 
   const lines = [
     'Новая заявка из MAX',
@@ -36,17 +32,17 @@ async function sendLeadEmail(lead) {
   ];
 
   try {
-    const info = await mailer.sendMail({
+    const result = await resend.emails.send({
       from: config.fromEmail,
       to: config.leadsEmail,
       subject: 'Новая заявка из MAX',
       text: lines.join('\n'),
     });
 
-    console.log('Lead email sent:', info?.messageId || '<no-message-id>');
-    return info;
+    console.log('Lead email sent via Resend:', JSON.stringify(result));
+    return result;
   } catch (error) {
-    console.error('Lead email failed:', error);
+    console.error('Lead email failed via Resend:', error);
     throw error;
   }
 }
