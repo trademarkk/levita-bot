@@ -13,11 +13,11 @@ function getStartText() {
 }
 
 function getStartButtons() {
-  return [[{ type: 'callback', text: 'Продолжить', payload: 'continue_flow' }]];
+  return [[{ type: 'callback', text: 'Продолжить ✨', payload: 'continue_flow' }]];
 }
 
 function getTelegramButtons() {
-  return [[{ type: 'callback', text: 'Пропустить', payload: 'skip_telegram' }]];
+  return [[{ type: 'callback', text: 'Пропустить 🌿', payload: 'skip_telegram' }]];
 }
 
 function getSavePhoneText() {
@@ -33,8 +33,8 @@ function getSavePhoneText() {
 
 function getSavePhoneButtons() {
   return [
-    [{ type: 'clipboard', text: 'Скопировать номер', payload: config.studioPhone }],
-    [{ type: 'callback', text: 'Я сохранила номер', payload: 'saved_studio_phone' }],
+    [{ type: 'clipboard', text: 'Скопировать номер 📋', payload: config.studioPhone }],
+    [{ type: 'callback', text: 'Номер сохранён 💛', payload: 'saved_studio_phone' }],
   ];
 }
 
@@ -54,8 +54,8 @@ function getConfirmText(lead) {
 
 function getConfirmButtons() {
   return [
-    [{ type: 'callback', text: 'Подтвердить', payload: 'confirm_lead' }],
-    [{ type: 'callback', text: 'Начать заново', payload: 'restart_flow' }],
+    [{ type: 'callback', text: 'Подтвердить заявку 💫', payload: 'confirm_lead' }],
+    [{ type: 'callback', text: 'Заполнить заново ↺', payload: 'restart_flow' }],
   ];
 }
 
