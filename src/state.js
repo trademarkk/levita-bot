@@ -7,6 +7,7 @@ function createEmptySession() {
       name: '',
       phone: '',
       telegram: '',
+      source: '',
     },
   };
 }

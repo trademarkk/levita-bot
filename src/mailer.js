@@ -34,7 +34,7 @@ async function sendLeadEmail(lead) {
     `Телефон: ${lead.phone}`,
     `Telegram: ${lead.telegram || 'не указан'}`,
     `Время: ${lead.createdAt}`,
-    'Источник: MAX bot / Яндекс Карты',
+    `Источник: ${lead.source || 'не указан'}`,
   ];
 
   if (telegramLink) {
@@ -51,7 +51,7 @@ async function sendLeadEmail(lead) {
       ? `<p><a href="${telegramLink}">Открыть Telegram</a></p>`
       : '',
     `<p><strong>Время:</strong> ${lead.createdAt}</p>`,
-    '<p><strong>Источник:</strong> MAX bot / Яндекс Карты</p>',
+    `<p><strong>Источник:</strong> ${lead.source || 'не указан'}</p>`,
     '</div>',
   ].join('');
 

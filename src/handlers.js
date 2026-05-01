@@ -22,8 +22,19 @@ function getUser(update) {
   return update.user || update.callback?.user || update.message?.sender || {};
 }
 
-async function sendWelcome(chatId, userId) {
-  resetSession(userId);
+function getStartPayload(update) {
+  return String(update.payload || update.start_payload || update.startPayload || '').trim();
+}
+
+function preserveSource(session, source) {
+  if (source) {
+    session.lead.source = source;
+  }
+}
+
+async function sendWelcome(chatId, userId, source = '') {
+  const session = resetSession(userId);
+  preserveSource(session, source);
 
   await sendMessage({
     chatId,
@@ -133,12 +144,12 @@ async function handleTextMessage(update) {
   const session = getSession(userId);
 
   if (!text) {
-    await sendWelcome(chatId, userId);
+    await sendWelcome(chatId, userId, getStartPayload(update));
     return;
   }
 
   if (text === '/start') {
-    await sendWelcome(chatId, userId);
+    await sendWelcome(chatId, userId, getStartPayload(update));
     return;
   }
 
@@ -193,7 +204,7 @@ async function handleTextMessage(update) {
     return;
   }
 
-  await sendWelcome(chatId, userId);
+  await sendWelcome(chatId, userId, session.lead.source);
 }
 
 function getCallbackPayload(update) {
@@ -241,11 +252,11 @@ async function handleCallback(update) {
   }
 
   if (payload === 'restart_flow') {
-    await sendWelcome(chatId, userId);
+    await sendWelcome(chatId, userId, getSession(userId).lead.source);
     return;
   }
 
-  await sendWelcome(chatId, userId);
+  await sendWelcome(chatId, userId, getSession(userId).lead.source);
 }
 
 async function handleUpdate(update) {
@@ -254,7 +265,12 @@ async function handleUpdate(update) {
   console.log('MAX update type:', type);
 
   if (type === 'bot_started') {
-    await sendWelcome(getChatId(update), getUser(update)?.user_id);
+    const source = getStartPayload(update);
+    if (source) {
+      console.log('MAX start payload:', source);
+    }
+
+    await sendWelcome(getChatId(update), getUser(update)?.user_id, source);
     return;
   }
 

@@ -37,15 +37,21 @@ function getSavePhoneButtons() {
 }
 
 function getConfirmText(lead) {
-  return [
+  const lines = [
     'Проверьте, пожалуйста, ваши данные:',
     '',
     `Имя: *${lead.name || '-'}*`,
     `Номер телефона: *${lead.phone || '-'}*`,
     `Ник в Telegram: *${lead.telegram || 'не указан'}*`,
-    '',
-    'Если всё верно, подтвердите отправку заявки.',
-  ].join('\n');
+  ];
+
+  if (lead.source) {
+    lines.push(`Источник: *${lead.source}*`);
+  }
+
+  lines.push('', 'Если всё верно, подтвердите отправку заявки.');
+
+  return lines.join('\n');
 }
 
 function getConfirmButtons() {
