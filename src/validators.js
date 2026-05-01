@@ -24,14 +24,35 @@ function normalizeTelegram(input) {
     return '';
   }
 
-  if (trimmed.startsWith('@')) {
-    return trimmed;
+  const cleaned = trimmed.replace(/^@/, '').replace(/\s+/g, '');
+
+  if (!/^[a-zA-Z0-9_]{5,32}$/.test(cleaned)) {
+    return null;
   }
 
-  return `@${trimmed}`;
+  return `@${cleaned}`;
+}
+
+function normalizeName(input) {
+  const trimmed = String(input || '').trim().replace(/\s+/g, ' ');
+
+  if (trimmed.length < 2 || trimmed.length > 40) {
+    return null;
+  }
+
+  if (/\d/.test(trimmed)) {
+    return null;
+  }
+
+  if (!/^[a-zA-Zа-яА-ЯёЁ\-\s]+$/.test(trimmed)) {
+    return null;
+  }
+
+  return trimmed;
 }
 
 module.exports = {
   normalizePhone,
   normalizeTelegram,
+  normalizeName,
 };

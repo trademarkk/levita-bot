@@ -2,7 +2,7 @@ const { getSession, resetSession } = require('./state');
 const { saveLead } = require('./storage');
 const { sendLeadEmail } = require('./mailer');
 const { sendMessage } = require('./maxApi');
-const { normalizePhone, normalizeTelegram } = require('./validators');
+const { normalizePhone, normalizeTelegram, normalizeName } = require('./validators');
 const {
   getStartText,
   getStartButtons,
@@ -15,12 +15,7 @@ const {
 } = require('./messages');
 
 function getChatId(update) {
-  return (
-    update.chat_id ||
-    update.message?.recipient?.chat_id ||
-    update.callback?.chat_id ||
-    null
-  );
+  return update.chat_id || update.message?.recipient?.chat_id || update.callback?.chat_id || null;
 }
 
 function getUser(update) {
@@ -103,15 +98,9 @@ async function finalizeLead({ chatId, userId, user }) {
     createdAt: new Date().toISOString(),
   };
 
-  console.log('Finalizing lead:', JSON.stringify(lead));
-
   try {
     await saveLead(lead);
-    console.log('Lead saved locally');
-
     await sendLeadEmail(lead);
-    console.log('Lead email step completed');
-
     resetSession(userId);
 
     await sendMessage({
@@ -119,7 +108,7 @@ async function finalizeLead({ chatId, userId, user }) {
       text: getFinalText(),
     });
 
-    console.log('Final message sent to user');
+    console.log('Lead finalized successfully');
   } catch (error) {
     console.error('Finalize lead failed:', error);
 
@@ -133,12 +122,7 @@ async function finalizeLead({ chatId, userId, user }) {
 }
 
 function getIncomingText(update) {
-  return String(
-    update.message?.body?.text ||
-      update.message?.text ||
-      update.text ||
-      ''
-  ).trim();
+  return String(update.message?.body?.text || update.message?.text || update.text || '').trim();
 }
 
 async function handleTextMessage(update) {
@@ -147,9 +131,6 @@ async function handleTextMessage(update) {
   const userId = user.user_id;
   const text = getIncomingText(update);
   const session = getSession(userId);
-
-  console.log('MAX message raw update:', JSON.stringify(update));
-  console.log('MAX incoming text:', text || '<empty>');
 
   if (!text) {
     await sendWelcome(chatId, userId);
@@ -167,7 +148,17 @@ async function handleTextMessage(update) {
   }
 
   if (session.step === 'waiting_name') {
-    await askPhone(chatId, userId, text);
+    const name = normalizeName(text);
+
+    if (!name) {
+      await sendMessage({
+        chatId,
+        text: 'Пожалуйста, укажите корректное имя: только буквы, минимум 2 символа.',
+      });
+      return;
+    }
+
+    await askPhone(chatId, userId, name);
     return;
   }
 
@@ -187,7 +178,18 @@ async function handleTextMessage(update) {
   }
 
   if (session.step === 'waiting_telegram') {
-    await askToSaveStudioPhone(chatId, userId, normalizeTelegram(text));
+    const telegram = normalizeTelegram(text);
+
+    if (telegram === null) {
+      await sendMessage({
+        chatId,
+        text: 'Пожалуйста, укажите корректный ник в Telegram в формате @username или нажмите «Пропустить».',
+        buttons: getTelegramButtons(),
+      });
+      return;
+    }
+
+    await askToSaveStudioPhone(chatId, userId, telegram);
     return;
   }
 
@@ -217,7 +219,6 @@ async function handleCallback(update) {
   const payload = getCallbackPayload(update);
 
   console.log('MAX callback payload:', payload || '<empty>');
-  console.log('MAX callback raw update:', JSON.stringify(update));
 
   if (payload === 'continue_flow' || payload === 'Продолжить') {
     await askName(chatId, userId);
