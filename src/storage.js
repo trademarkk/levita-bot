@@ -22,6 +22,45 @@ async function saveLead(lead) {
   await fs.writeFile(config.dataFile, JSON.stringify(leads, null, 2), 'utf8');
 }
 
+function isWithinMs(dateString, windowMs) {
+  const timestamp = new Date(dateString).getTime();
+
+  if (!Number.isFinite(timestamp)) {
+    return false;
+  }
+
+  return Date.now() - timestamp <= windowMs;
+}
+
+async function findRecentDuplicateLead({ maxUserId, phone }) {
+  const leads = await readLeads();
+
+  const duplicateByUser = leads.find(
+    (lead) => lead.maxUserId === maxUserId && isWithinMs(lead.createdAt, 30 * 60 * 1000)
+  );
+
+  if (duplicateByUser) {
+    return {
+      type: 'user',
+      lead: duplicateByUser,
+    };
+  }
+
+  const duplicateByPhone = leads.find(
+    (lead) => lead.phone === phone && isWithinMs(lead.createdAt, 24 * 60 * 60 * 1000)
+  );
+
+  if (duplicateByPhone) {
+    return {
+      type: 'phone',
+      lead: duplicateByPhone,
+    };
+  }
+
+  return null;
+}
+
 module.exports = {
   saveLead,
+  findRecentDuplicateLead,
 };

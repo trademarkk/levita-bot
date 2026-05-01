@@ -1,5 +1,5 @@
 const { getSession, resetSession } = require('./state');
-const { saveLead } = require('./storage');
+const { saveLead, findRecentDuplicateLead } = require('./storage');
 const { sendLeadEmail } = require('./mailer');
 const { sendMessage } = require('./maxApi');
 const { normalizePhone, normalizeTelegram, normalizeName } = require('./validators');
@@ -110,6 +110,20 @@ async function finalizeLead({ chatId, userId, user }) {
   };
 
   try {
+    const duplicate = await findRecentDuplicateLead({
+      maxUserId: lead.maxUserId,
+      phone: lead.phone,
+    });
+
+    if (duplicate) {
+      await sendMessage({
+        chatId,
+        text: 'Мы уже получили вашу заявку 💛 Если нужно уточнить данные, пожалуйста, напишите нам напрямую или попробуйте позже.',
+      });
+      console.log(`Duplicate lead blocked by ${duplicate.type}`);
+      return;
+    }
+
     await saveLead(lead);
     await sendLeadEmail(lead);
     resetSession(userId);
