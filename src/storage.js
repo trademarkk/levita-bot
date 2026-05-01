@@ -1,4 +1,5 @@
 const fs = require('fs/promises');
+const path = require('path');
 const config = require('./config');
 
 async function readLeads() {
@@ -16,6 +17,8 @@ async function readLeads() {
 async function saveLead(lead) {
   const leads = await readLeads();
   leads.push(lead);
+
+  await fs.mkdir(path.dirname(config.dataFile), { recursive: true });
   await fs.writeFile(config.dataFile, JSON.stringify(leads, null, 2), 'utf8');
 }
 
