@@ -49,7 +49,7 @@ async function askName(chatId, userId) {
 
   await sendMessage({
     chatId,
-    text: 'Пожалуйста, напишите ваше имя',
+    text: '👤 Пожалуйста, напишите ваше имя',
   });
 }
 
@@ -60,7 +60,7 @@ async function askPhone(chatId, userId, name) {
 
   await sendMessage({
     chatId,
-    text: 'Пожалуйста, укажите ваш номер телефона',
+    text: '📞 Пожалуйста, укажите ваш номер телефона',
   });
 }
 
@@ -71,7 +71,7 @@ async function askTelegram(chatId, userId, phone) {
 
   await sendMessage({
     chatId,
-    text: 'Пожалуйста, укажите ваш ник в telegram(при наличии)',
+    text: '📨 Пожалуйста, укажите ваш ник в Telegram, если он есть\n\nЕсли Telegram нет — просто нажмите «Пропустить» ✨',
     buttons: getTelegramButtons(),
   });
 }
@@ -118,7 +118,7 @@ async function finalizeLead({ chatId, userId, user }) {
     if (duplicate) {
       await sendMessage({
         chatId,
-        text: 'Мы уже получили вашу заявку 💛 Если нужно уточнить данные, пожалуйста, напишите нам напрямую или попробуйте позже.',
+        text: 'Мы уже получили вашу заявку 💛\n\nЕсли нужно уточнить данные, пожалуйста, напишите нам напрямую или попробуйте позже.',
       });
       console.log(`Duplicate lead blocked by ${duplicate.type}`);
       return;
@@ -139,7 +139,7 @@ async function finalizeLead({ chatId, userId, user }) {
 
     await sendMessage({
       chatId,
-      text: 'Заявка не отправилась из-за технической ошибки. Попробуйте ещё раз чуть позже или напишите нам напрямую.',
+      text: '⚠️ Заявка не отправилась из-за технической ошибки.\n\nПопробуйте ещё раз чуть позже или напишите нам напрямую.',
     });
 
     throw error;
@@ -178,7 +178,7 @@ async function handleTextMessage(update) {
     if (!name) {
       await sendMessage({
         chatId,
-        text: 'Пожалуйста, укажите корректное имя: только буквы, минимум 2 символа.',
+        text: '👤 Пожалуйста, укажите корректное имя:\nтолько буквы и минимум 2 символа 💛',
       });
       return;
     }
@@ -193,7 +193,7 @@ async function handleTextMessage(update) {
     if (!phone) {
       await sendMessage({
         chatId,
-        text: 'Не смогла распознать номер. Пожалуйста, отправьте его ещё раз в формате +7XXXXXXXXXX',
+        text: '📞 Не смогла распознать номер.\n\nПожалуйста, отправьте его ещё раз в формате: *+7XXXXXXXXXX*',
       });
       return;
     }
@@ -208,7 +208,7 @@ async function handleTextMessage(update) {
     if (telegram === null) {
       await sendMessage({
         chatId,
-        text: 'Пожалуйста, укажите корректный ник в Telegram в формате @username или нажмите «Пропустить».',
+        text: '📨 Пожалуйста, укажите корректный ник в Telegram в формате *@username*\nили нажмите «Пропустить» ✨',
         buttons: getTelegramButtons(),
       });
       return;
