@@ -14,6 +14,19 @@ const {
   getFinalText,
 } = require('./messages');
 
+function getChatId(update) {
+  return (
+    update.chat_id ||
+    update.message?.recipient?.chat_id ||
+    update.callback?.chat_id ||
+    null
+  );
+}
+
+function getUser(update) {
+  return update.user || update.callback?.user || update.message?.sender || {};
+}
+
 async function sendWelcome(chatId, userId) {
   resetSession(userId);
 
@@ -110,8 +123,8 @@ function getIncomingText(update) {
 }
 
 async function handleTextMessage(update) {
-  const chatId = update.chat_id;
-  const user = update.user || {};
+  const chatId = getChatId(update);
+  const user = getUser(update);
   const userId = user.user_id;
   const text = getIncomingText(update);
   const session = getSession(userId);
@@ -179,8 +192,8 @@ function getCallbackPayload(update) {
 }
 
 async function handleCallback(update) {
-  const chatId = update.chat_id;
-  const user = update.user || {};
+  const chatId = getChatId(update);
+  const user = getUser(update);
   const userId = user.user_id;
   const payload = getCallbackPayload(update);
 
@@ -221,7 +234,7 @@ async function handleUpdate(update) {
   console.log('MAX update type:', type);
 
   if (type === 'bot_started') {
-    await sendWelcome(update.chat_id, update.user?.user_id);
+    await sendWelcome(getChatId(update), getUser(update)?.user_id);
     return;
   }
 
