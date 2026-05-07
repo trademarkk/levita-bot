@@ -7,6 +7,10 @@ module.exports = {
   maxWebhookSecret: process.env.MAX_WEBHOOK_SECRET || '',
   maxWebhookUrl: process.env.MAX_WEBHOOK_URL || '',
   studioPhone: process.env.STUDIO_PHONE || '+79288803832',
+  studioCity: process.env.STUDIO_CITY || 'Краснодар',
+  privacyPolicyUrl:
+    process.env.PRIVACY_POLICY_URL ||
+    'https://drive.google.com/file/d/1OM3Ix-suWSWmgMpC2b4imnusEPzMlzlx/view?usp=sharing',
   resendApiKey: process.env.RESEND_API_KEY || '',
   leadsEmail: process.env.LEADS_EMAIL || '',
   fromEmail: process.env.FROM_EMAIL || '',
